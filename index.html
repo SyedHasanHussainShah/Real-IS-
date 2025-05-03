@@ -1,0 +1,216 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Chain-Vallet DApp</title>
+  <link rel="icon" href="th.png" type="image/png">
+  <link rel="stylesheet" href="styles.css">
+  <script src="https://cdn.jsdelivr.net/npm/ethers@5.7.2/dist/ethers.umd.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="app.js" defer></script>
+</head>
+<body class="dark">
+  <div id="animated-background"></div>
+
+  <div class="min-h-screen flex flex-col">
+    <header class="py-4 px-6">
+      <div class="flex justify-between items-center">
+        <div class="text-2xl font-bold text-primary">
+          <span class="hidden md:inline">Chain</span> Wallet
+        </div>
+        <button id="themeToggle" class="p-2 rounded-full hover:bg-gray-200 dark:hover:bg-gray-700">
+          <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 dark:hidden" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z" />
+          </svg>
+          <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 hidden dark:block" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z" />
+          </svg>
+        </button>
+      </div>
+    </header>
+  
+    <main class="flex-grow flex items-center justify-center p-4">
+      <div class="container rounded-2xl p-6 w-full max-w-md">
+        <div class="text-center mb-8">
+          <div class="flex justify-center mb-4">
+            <img src="https://pfst.cf2.poecdn.net/base/image/ac16f417632b311ea5b734e07ad78a541294c63b7b64bef7513e1638267413eb" alt="Wallet Logo" class="w-16 h-16 rounded-full" />
+          </div>
+          <h1 class="text-2xl md:text-3xl font-bold text-gradient bg-clip-text text-transparent bg-gradient-to-r from-blue-600 to-purple-600">
+            CRYPTO WALLET DAPP
+          </h1>
+          <p id="status" class="mt-2 text-sm">
+            <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-200">
+              Not connected
+            </span>
+          </p>
+        </div>
+
+        <div class="mb-6">
+          <button id="walletButton" class="w-full py-3 px-4 bg-primary hover:bg-opacity-90 text-white rounded-lg font-medium transition duration-200 flex items-center justify-center">
+            <span class="mr-2">🔌</span> Connect Meta-Mask 
+          </button>
+        </div>
+        
+        <!-- Include in your main HTML file -->
+<div class="mt-4 md:mt-0">
+  <div class="text-sm text-gray-600 dark:text-gray-400">Your Balance</div>
+  <div class="flex items-center">
+    <div id="account-balance" class="text-2xl font-bold">0.00 ETH</div>
+    <button id="refresh-balance" class="ml-2 p-1 hover:bg-gray-200 dark:hover:bg-gray-700 rounded" title="Refresh">
+      <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-gray-500 dark:text-gray-300" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+          d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+      </svg>
+    </button>
+  </div>
+</div>
+ 
+
+        <div class="mb-6 border-b border-gray-200 dark:border-gray-700">
+          <ul class="flex flex-wrap -mb-px text-sm font-medium text-center" role="tablist">
+            <li class="mr-2" role="presentation">
+              <button id="send-tab" class="inline-block p-4 border-b-2 border-primary rounded-t-lg" 
+                role="tab" aria-selected="true">
+                Send Funds
+              </button>
+            </li>
+            <li class="mr-2" role="presentation">
+              <button id="contract-tab" class="inline-block p-4 border-b-2 border-transparent hover:border-gray-300 rounded-t-lg" 
+                role="tab" aria-selected="false">
+                Contract
+              </button>
+            </li>
+            <li role="presentation">
+              <button id="history-tab" class="inline-block p-4 border-b-2 border-transparent hover:border-gray-300 rounded-t-lg" 
+                role="tab" aria-selected="false">
+                History
+              </button>
+            </li>
+          </ul>
+        </div>
+        
+        <div id="tab-content" class="mb-6">
+          <div id="send-panel" class="space-y-4">
+            <div>
+              <label for="recipient" class="block text-sm font-medium mb-1">Recipient Address</label>
+              <input id="recipient" type="text" placeholder="0x..." 
+                class="form-input w-full px-4 py-2 rounded-lg border dark:bg-gray-800 dark:border-gray-700" />
+            </div>
+            <div>
+              <label for="amount" class="block text-sm font-medium mb-1">Amount (ETH)</label>
+              <input id="amount" type="text" placeholder="0.01" 
+                class="form-input w-full px-4 py-2 rounded-lg border dark:bg-gray-800 dark:border-gray-700" />
+            </div>
+            <button id="sendBtn" class="w-full py-3 bg-gradient-to-r from-blue-500 to-purple-600 hover:from-blue-600 hover:to-purple-700 text-white rounded-lg font-medium transition duration-200">
+              Send ETH
+            </button>
+          </div>
+          
+          <div id="contract-panel" class="space-y-4 hidden">
+            <div class="bg-gray-100 dark:bg-gray-800 p-4 rounded-lg">
+              <p class="text-sm mb-2">Contract Address:</p>
+              <p id="contractAddress" class="text-xs break-all">0xbdD7894608cF5fF110e3E7b2C398e6FACD9a5dBC</p>
+            </div>
+            <button id="withdrawBtn" class="w-full py-3 px-4 bg-primary hover:bg-opacity-90 text-white rounded-lg font-medium transition duration-200 flex items-center justify-center">
+              <span class="mr-2">⬇️</span> Withdraw 0.01 ETH to Owner
+            </button>
+            <div class="mt-4">
+              <h3 class="font-medium mb-2">Send from Contract</h3>
+              <div class="space-y-2">
+                <input id="contractRecipient" type="text" placeholder="Recipient address" 
+                  class="form-input w-full px-4 py-2 rounded-lg border dark:bg-gray-800 dark:border-gray-700" />
+                <input id="contractAmount" type="text" placeholder="Amount in ETH" 
+                  class="form-input w-full px-4 py-2 rounded-lg border dark:bg-gray-800 dark:border-gray-700" />
+                <div class="flex space-x-2">
+                  <button id="sendContractBtn" class="flex-grow py-2 bg-gradient-to-r from-blue-500 to-purple-600 hover:from-blue-600 hover:to-purple-700 text-white rounded-lg font-medium transition duration-200">
+                    Send ETH from Contract
+                  </button>
+                  <button id="downloadBtn" class="py-2 px-3 bg-gray-200 dark:bg-gray-700 text-gray-700 dark:text-gray-200 rounded-lg font-medium hover:bg-gray-300 dark:hover:bg-gray-600 transition duration-200">
+                    🡇
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+          
+          <div id="history-panel" class="space-y-2 hidden">
+            <div class="bg-gray-100 dark:bg-gray-800 p-3 rounded-lg">
+              <div class="flex justify-between items-center text-sm">
+                <span class="font-medium">Recent Transactions</span>
+                <button id="refreshHistory" class="text-primary hover:text-opacity-80">
+                  🔄 Refresh
+                </button>
+                <button onclick="downloadTransactions()" class="neon-btn" style="color: rgb(80, 59, 240)">🡇 Download All</button>
+              </div>
+            </div>
+            <div id="transactions" class="space-y-2 max-h-60 overflow-y-auto">
+              <!-- Transactions will be populated here -->
+            </div>
+          </div>
+        </div>
+      </div>
+    </main>
+
+    <footer class="p-4 text-center text-sm text-gray-500 dark:text-gray-400">
+      <p>© 2025 Chain-Vallet DApp. All rights reserved.</p>
+    </footer>
+  </div>
+
+  <!-- Modal for messages -->
+  <div id="modal" class="fixed inset-0 z-50 flex items-center justify-center hidden">
+    <div class="absolute inset-0 bg-black bg-opacity-50 modal"></div>
+    <div class="modal-content relative bg-white dark:bg-gray-800 rounded-lg max-w-md w-11/12 p-6 shadow-xl">
+      <div class="flex justify-between items-start mb-4">
+        <h3 id="modalTitle" class="text-lg font-medium"></h3>
+        <button id="closeModal" class="text-gray-400 hover:text-gray-500 dark:text-gray-300 dark:hover:text-gray-200">
+          <svg class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+          </svg>
+        </button>
+      </div>
+      <div id="modalContent" class="mb-4"></div>
+      <div class="flex justify-end">
+        <button id="modalOkBtn" class="px-4 py-2 bg-primary text-white rounded hover:bg-opacity-90">
+          OK
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Password Modal -->
+  <div id="passwordModal" class="fixed inset-0 z-50 flex items-center justify-center hidden">
+    <div class="absolute inset-0 bg-black bg-opacity-50 modal"></div>
+    <div class="modal-content relative bg-white dark:bg-gray-800 rounded-lg max-w-md w-11/12 p-6 shadow-xl">
+      <div class="flex justify-between items-start mb-4">
+        <h3 class="text-lg font-medium">🔐 Wallet Authentication</h3>
+      </div>
+      <div class="mb-4">
+        <p class="mb-4">Please enter your wallet password to continue.</p>
+        <input id="passwordInput" type="password" class="form-input w-full px-4 py-2 rounded-lg border dark:bg-gray-700 dark:border-gray-600" placeholder="Enter password">
+        <p id="passwordError" class="text-red-500 mt-2 text-sm hidden">Incorrect password, please try again.</p>
+      </div>
+      <div class="flex justify-end space-x-2">
+        <button id="cancelPasswordBtn" class="px-4 py-2 bg-gray-200 dark:bg-gray-700 text-gray-700 dark:text-gray-200 rounded hover:bg-gray-300 dark:hover:bg-gray-600">
+          Cancel
+        </button>
+        <button id="submitPasswordBtn" class="px-4 py-2 bg-primary text-white rounded hover:bg-opacity-90">
+          Submit
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Loading Spinner -->
+  <div id="loadingSpinner" class="fixed inset-0 z-50 flex items-center justify-center hidden">
+    <div class="absolute inset-0 bg-black bg-opacity-30 modal"></div>
+    <div class="p-4 rounded-full bg-white dark:bg-gray-800">
+      <svg class="animate-spin h-8 w-8 text-primary" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+        <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+        <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+      </svg>
+    </div>
+  </div>
+</body>
+</html>
